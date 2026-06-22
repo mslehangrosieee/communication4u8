@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ms Lê Hằng English - Quiz Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8854C0;
+            --secondary-color: #FDCB6E;
+            --accent-color: #00C9A7;
+            --correct-color: #00D26A;
+            --wrong-color: #FF4757;
+            --text-color: #2D3436;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(-45deg, #8854C0, #FDCB6E, #00C9A7, #E8505B);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* SVG Floating Pattern Background Overlays */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M9 26c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm42 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-4-18c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM14 42c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm24-6c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-6-22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM10 10L12 12M50 50L48 48M50 10L48 12M10 50L12 48' stroke='%23fff' stroke-width='2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+            animation: floatingPattern 30s linear infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatingPattern {
+            0% { background-position: 0 0; }
+            100% { background-position: 600px 600px; }
+        }
+
+        .container {
+            max-width: 750px;
+            width: 100%;
+            z-index: 1;
+            margin-bottom: 50px;
+        }
+
+        header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 0px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border: 3px solid #fff;
+        }
+
+        header h2 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            font-weight: 900;
+        }
+
+        .alert-box {
+            background: #FFF3CD;
+            border: 4px dashed #FFC107;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            color: #856404;
+            text-align: center;
+            font-weight: 700;
+            box-shadow: 0 6px 0 #E0A800;
+        }
+
+        .exercise-title {
+            background: #fff;
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-weight: 900;
+            color: #4A148C;
+            border-left: 8px solid var(--accent-color);
+            box-shadow: 0 5px 0px rgba(0,0,0,0.05);
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 12px 0px rgba(0, 0, 0, 0.15);
+            border: 4px solid #E0E0E0;
+            position: relative;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: #F8F9FA;
+            border: 3px solid #E0E0E0;
+            border-radius: 18px;
+            padding: 15px 20px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #E0E0E0;
+            position: relative;
+            top: 0;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #D0D0D0;
+            background: #F1F3F5;
+        }
+
+        .option-btn:active:not(.disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #D0D0D0;
+        }
+
+        /* State Classes */
+        .option-btn.correct {
+            background-color: var(--correct-color) !important;
+            border-color: #00B359 !important;
+            color: white !important;
+            box-shadow: 0 6px 0 #00994C !important;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color) !important;
+            border-color: #E03D49 !important;
+            color: white !important;
+            box-shadow: 0 6px 0 #C82333 !important;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .option-btn.disabled {
+            pointer-events: none;
+        }
+
+        /* Shake Animation */
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* Explanation Box */
+        .explanation-box {
+            margin-top: 20px;
+            background: #E8F5E9;
+            border-radius: 18px;
+            border: 3px dashed #81C784;
+            padding: 20px;
+            display: none;
+            animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exp-title {
+            color: #2E7D32;
+            font-weight: 900;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .exp-content {
+            font-size: 0.95rem;
+            color: #1B5E20;
+            line-height: 1.6;
+        }
+
+        .exp-content ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        /* Submit Button Section */
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #D64545;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .btn-submit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 0 #D64545;
+        }
+
+        .btn-submit:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #D64545;
+        }
+
+        /* Popup Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1; pointer-events: auto;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 0px rgba(0,0,0,0.2);
+            border: 6px solid var(--primary-color);
+            transform: scale(0.7);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .modal-score {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--accent-color);
+            margin: 20px 0;
+        }
+
+        .modal-comment {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-color);
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .btn-close {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #673AB7;
+        }
+
+        .btn-close:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #673AB7;
+        }
+
+        /* Canvas Confetti */
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container">
+        <header>
+            <h2>Giáo viên tạo: Ms Lê Hằng English</h2>
+        </header>
+
+        <div class="alert-box">
+            ⚠️ LỜI NHẮC CỰC KỲ QUAN TRỌNG ⚠️<br>
+            Chỉ có đọc kỹ giải thích ngay sau mỗi câu, sau đó ghi lại từ vựng/cấu trúc mới vào vở để học thì mới thực sự giỏi lên.<br>
+            Làm cho xong mà không đọc giải thích hay đọc qua loa không ghi chép thì chỉ tốn thời gian vô ích!<br>
+            <span style="color: #FF4757;">* Kéo tới đâu, làm tới đó! *</span>
+        </div>
+
+        <!-- EXERCISE 1 -->
+        <div class="exercise-title">Exercise 1: Choose the word or phrase (A, B, C, or D) that best completes each of the following exchanges.</div>
+        <div id="exercise1-container"></div>
+
+        <!-- EXERCISE 2 -->
+        <div class="exercise-title">Exercise 2: Choose the correct answer (A, B, C, or D) to arrange the following sentences into a meaningful conversation.</div>
+        <div id="exercise2-container"></div>
+
+        <!-- SUBMIT BUTTON -->
+        <div class="submit-section">
+            <button class="btn-submit" onclick="submitQuiz()">🎉 NỘP BÀI XEM ĐIỂM 🎉</button>
+        </div>
+    </div>
+
+    <!-- POPUP MODAL -->
+    <div class="modal-overlay" id="scoreModal">
+        <div class="modal-content">
+            <div class="modal-title">Kết Quả Bài Làm</div>
+            <div class="modal-score" id="popupScore">0/8</div>
+            <div class="modal-comment" id="popupComment">Lời nhận xét từ cô...</div>
+            <button class="btn-close" onclick="closeModal()">Làm lại bài 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Questions Object
+        const questionsData = [
+            {
+                id: 1,
+                ex: 1,
+                question: "- Mike: Hello, I’m from Australia. Can I ask you something about the ethnic groups of Viet Nam?\n- Nick: “_______”",
+                options: [
+                    { key: "A", text: "Good." },
+                    { key: "B", text: "Really." },
+                    { key: "C", text: "Sure." },
+                    { key: "D", text: "Thanks." }
+                ],
+                correct: "C",
+                explanation: `<strong>1. Phân tích từ vựng 4 đáp án:</strong><ul><li>A. Good (adj): Tốt, giỏi.</li><li>B. Really (adv): Thực sự à, thế à (dùng diễn tả sự ngạc nhiên).</li><li>C. Sure (adv/idiom): Chắc chắn rồi (dùng để đồng ý một lời xin phép lịch sự).</li><li>D. Thanks (v/int): Cảm ơn.</li></ul><strong>2. Dịch nghĩa toàn câu:</strong><br>"- Mike: Xin chào, mình đến từ Úc. Mình có thể hỏi bạn vài điều về các dân tộc ở Việt Nam được không?<br>- Nick: Chắc chắn rồi."<br><strong>3. Tại sao chọn C?</strong><br>Khi Mike đưa ra câu hỏi xin phép lịch sự "Can I ask you something...?" (Mình hỏi chút được không?), phản hồi tự nhiên và phù hợp nhất để đồng ý, cho phép người khác hỏi là "Sure." (Chắc chắn rồi).<br><strong>4. Tại sao các đáp án khác SAI?</strong><br>Loại A, B, D vì không hợp ngữ cảnh giao tiếp phản hồi lại một lời xin phép.`
+            },
+            {
+                id: 2,
+                ex: 1,
+                question: "- Tom: \"How about going out for dinner?\"\n- Jane: “_______”",
+                options: [
+                    { key: "A", text: "It’s a good idea." },
+                    { key: "B", text: "Well done." },
+                    { key: "C", text: "Yes, we do." },
+                    { key: "D", text: "You’re welcome." }
+                ],
+                correct: "A",
+                explanation: `<strong>1. Phân tích từ vựng 4 đáp án:</strong><ul><li>A. It’s a good idea: Đó là một ý kiến hay (dùng để đồng ý lời gợi ý).</li><li>B. Well done: Làm tốt lắm (dùng để khen ngợi ai vừa làm tốt việc gì).</li><li>C. Yes, we do: Vâng, chúng tôi có/làm (trả lời cho câu hỏi Yes/No với trợ từ do).</li><li>D. You’re welcome: Không có gì (dùng để đáp lại lời cảm ơn).</li></ul><strong>2. Dịch nghĩa toàn câu:</strong><br>"- Tom: Hay là tối nay chúng ta đi ra ngoài ăn tối nhé?<br>- Jane: Đó là một ý kiến hay đấy."<br><strong>3. Tại sao chọn A?</strong><br>Cấu trúc "How about + V-ing...?" dùng để đưa ra lời đề nghị, gợi ý cùng làm một việc gì đó. Để đồng tình một cách hào hứng với lời gợi ý, ta dùng "It’s a good idea."<br><strong>4. Tại sao các đáp án khác SAI?</strong><br>Loại B, C, D vì ý nghĩa hoàn toàn lạc đề và không đúng chức năng giao tiếp đáp lại lời gợi ý.`
+            },
+            {
+                id: 3,
+                ex: 1,
+                question: "- Andrew: \"Whose is this book?\"\n- Alex: “_______”",
+                options: [
+                    { key: "A", text: "It’s a book." },
+                    { key: "B", text: "Thanks." },
+                    { key: "C", text: "It’s mine." },
+                    { key: "D", text: "Here you are." }
+                ],
+                correct: "C",
+                explanation: `<strong>1. Phân tích từ vựng 4 đáp án:</strong><ul><li>A. It’s a book: Nó là một cuốn sách.</li><li>B. Thanks: Cảm ơn.</li><li>C. It’s mine: Nó là của tớ (Mine là đại từ sở hữu = my book).</li><li>D. Here you are: Của bạn đây (dùng khi đưa đồ vật cho ai).</li></ul><strong>2. Dịch nghĩa toàn câu:</strong><br>"- Andrew: Cuốn sách này của ai thế?<br>- Alex: Nó là của tớ."<br><strong>3. Tại sao chọn C?</strong><br>Câu hỏi bắt đầu bằng từ hỏi "Whose" (Của ai) nhằm kiểm tra quyền sở hữu của đồ vật. Câu trả lời bắt buộc phải là một đại từ sở hữu, một danh từ có sở hữu cách, hoặc tính từ sở hữu. Do đó "It's mine" (Nó là của tớ) là đáp án đúng duy nhất.<br><strong>4. Tại sao các đáp án khác SAI?</strong><br>Loại A vì trả lời sai trọng tâm câu hỏi vật gì thay vì của ai. Loại B, D không phù hợp ngữ cảnh.`
+            },
+            {
+                id: 4,
+                ex: 1,
+                question: "- Jenny: \"Will you take up making pottery in the future?\"\n- Dane: “_______”",
+                options: [
+                    { key: "A", text: "Not at all." },
+                    { key: "B", text: "I’m not sure." },
+                    { key: "C", text: "Really." },
+                    { key: "D", text: "Good" }
+                ],
+                correct: "B",
+                explanation: `<strong>1. Phân tích từ vựng 4 đáp án:</strong><ul><li>A. Not at all: Không có gì đâu (đáp lại lời cảm ơn hoặc xin lỗi).</li><li>B. I’m not sure: Tớ không chắc chắn lắm (diễn tả sự lưỡng lự về một việc trong tương lai).</li><li>C. Really: Thật sao.</li><li>D. Good: Tốt.</li></ul><strong>2. Dịch nghĩa toàn câu:</strong><br>"- Jenny: Bạn sẽ bắt đầu học làm đồ gốm trong tương lai chứ?<br>- Dane: Tớ không chắc chắn nữa."<br><strong>3. Tại sao chọn B?</strong><br>Câu hỏi "Will you... in the future?" hỏi về ý định chắc chắn trong tương lai. Khi người nói chưa có quyết định rõ ràng, câu trả lời thích hợp nhất thể hiện điều đó là "I’m not sure."<br><strong>4. Tại sao các đáp án khác SAI?</strong><br>Loại A, C, D không mang chức năng phản hồi đúng và hợp lý cho câu hỏi phỏng đoán ý định tương lai.`
+            },
+            {
+                id: 5,
+                ex: 1,
+                question: "- Mike: \"I’ve got?\"\n- Nick: “_______”",
+                options: [
+                    { key: "A", text: "Yes, we do." },
+                    { key: "B", text: "That’s a good idea." },
+                    { key: "C", text: "You’re welcome." },
+                    { key: "D", text: "Not at all." }
+                ],
+                correct: "B",
+                explanation: `<strong>1. Phân tích ngữ cảnh đáp án:</strong><ul><li>A. Yes, we do: Vâng, chúng tôi có.</li><li>B. That’s a good idea: Đó là một ý tưởng hay.</li><li>C. You’re welcome: Không có gì.</li><li>D. Not at all: Không có chi.</li></ul><strong>2. Dịch nghĩa và phân tích câu:</strong><br>Mặc dù vế lời thoại của Mike "I’ve got?" trong đề bài bị khuyết thông tin do lỗi văn bản gốc (thường là một lời rủ rê hoặc gợi ý đưa ra ý tưởng), dựa vào hệ thống phương án đáp án lựa chọn chuẩn mực giao tiếp, chỉ có đáp án B "That's a good idea" là một phản hồi hoàn chỉnh cho một lời đề xuất.<br><strong>3. Tại sao chọn B?</strong><br>Đáp án mang tính xây dựng hội thoại nhất khi phản hồi một ý kiến hay một dự định vừa được nêu ra.<br><strong>4. Các đáp án khác SAI:</strong><br>Các đáp án còn lại hoàn toàn trật khớp về ngữ pháp đối ứng trực tiếp.`
+            },
+            {
+                id: 6,
+                ex: 2,
+                question: "Sắp xếp các câu sau thành đoạn hội thoại hợp lý:\na. Ally: Oh, I see! So it's an important place for the community.\nb. Brian: That's a communal house, Ally. People meet there for village events.\nc. Ally: Look, Brian! What's that building?",
+                options: [
+                    { key: "A", text: "a-b-c" },
+                    { key: "B", text: "c-a-b" },
+                    { key: "C", text: "b-c-a" },
+                    { key: "D", text: "c-b-a" }
+                ],
+                correct: "D",
+                explanation: `<strong>1. Dịch nghĩa các câu:</strong><ul><li>a. Ally: Ồ, mình hiểu rồi! Vậy đó là một nơi quan trọng đối với cộng đồng.</li><li>b. Brian: Đó là một ngôi nhà rông/nhà văn hóa chung đấy Ally. Mọi người tụ họp ở đó cho các sự kiện của làng.</li><li>c. Ally: Nhìn kìa, Brian! Tòa nhà kia là gì thế?</li></ul><strong>2. Sắp xếp logic:</strong><br>- Bước đầu tiên phải là Ally bắt chuyện và hỏi về tòa nhà lạ mắt đập vào mắt: (c)<br>- Tiếp theo, Brian giải đáp thắc mắc tòa nhà đó là "communal house" và công dụng của nó: (b)<br>- Cuối cùng, Ally tiếp thu thông tin, thốt lên hiểu ra vấn đề "Oh, I see!" và rút ra kết luận: (a).<br>Trình tự đúng là: c - b - a.<br><strong>3. Kết luận:</strong> Chọn đáp án D.`
+            },
+            {
+                id: 7,
+                ex: 2,
+                question: "Sắp xếp các câu sau thành đoạn hội thoại hợp lý:\na. Ally: Wow, it's beautiful and smells delicious!\nb. Ally: Look, Brian! This sticky rice is so colorful!\nc. Brian: That's five-colour sticky rice, Ally. It's special for festivals.",
+                options: [
+                    { key: "A", text: "a-b-c" },
+                    { key: "B", text: "b-a-c" },
+                    { key: "C", text: "b-c-a" },
+                    { key: "D", text: "c-b-a" }
+                ],
+                correct: "C",
+                explanation: `<strong>1. Dịch nghĩa các câu:</strong><ul><li>a. Ally: Oa, nó thật đẹp và ngửi mùi có vẻ thơm ngon quá!</li><li>b. Ally: Nhìn kìa, Brian! Món xôi này nhiều màu sắc quá!</li><li>c. Brian: Đó là món xôi ngũ sắc đấy, Ally. Nó là món đặc sản cho các dịp lễ hội.</li></ul><strong>2. Sắp xếp logic:</strong><br>- Trước tiên, Ally trầm trồ chỉ tay vào đĩa xôi đầy màu sắc thu hút ánh nhìn: (b)<br>- Sau đó, Brian liền giải thích tên gọi của món xôi đó là xôi ngũ sắc (five-colour sticky rice): (c)<br>- Cuối cùng, Ally cảm nhận sâu hơn sau khi nghe giải thích về cả vẻ đẹp lẫn hương vị ngào ngạt thơm ngon: (a).<br>Trình tự đúng là: b - c - a.<br><strong>3. Kết luận:</strong> Chọn đáp án C.`
+            },
+            {
+                id: 8,
+                ex: 2,
+                question: "Sắp xếp các câu sau thành đoạn hội thoại hợp lý:\na. It looks like giant stairs! How do they make them so flat?\nb. Wow, Brian! Look at those beautiful fields on the mountain.\nc. They carve them into the hills. It's very clever.\nd. It must be hard work, but the view is amazing!\ne. Those are terraced fields, Ally. Farmers grow rice there.",
+                options: [
+                    { key: "A", text: "b-e-a-c-d" },
+                    { key: "B", text: "b-a-e-c-d" },
+                    { key: "C", text: "e-b-a-c-d" },
+                    { key: "D", text: "a-b-c-d-e" }
+                ],
+                correct: "A",
+                explanation: `<strong>1. Dịch nghĩa các câu:</strong><ul><li>a. Nhìn chúng giống như những bậc thang khổng lồ vậy! Làm sao họ có thể làm chúng bằng phẳng đến thế nhỉ?</li><li>b. Ồ, Brian! Hãy nhìn những cánh đồng xinh đẹp trên núi kìa.</li><li>c. Họ đục đẽo vát chúng vào sườn đồi đấy. Thật là thông minh tuyệt vời.</li><li>d. Công việc đó chắc hẳn phải vất vả lắm, nhưng khung cảnh thì thật kinh ngạc!</li><li>e. Đó là những ruộng bậc thang đấy, Ally. Người nông dân trồng lúa ở đó.</li></ul><strong>2. Sắp xếp logic chuỗi hội thoại:</strong><br>- Đầu tiên Ally mở đầu khen ngợi những cánh đồng trên núi cao: (b)<br>- Brian tiếp lời định nghĩa giải thích đó gọi là ruộng bậc thang: (e)<br>- Ally tiếp tục tò mò hỏi làm sao phẳng thế vì trông giống bậc thang: (a)<br>- Brian giải thích cách làm khoét vạt đồi: (c)<br>- Ally kết luận cảm thán về sự chăm chỉ vất vả và view đẹp: (d).<br>Chuỗi chuẩn xác: b - e - a - c - d.<br><strong>3. Kết luận:</strong> Chọn đáp án A.`
+            }
+        ];
+
+        // Web Audio API Sound Generator (No external links required)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                // High-pitched cheerful "Ding" sound
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } else {
+                // Low-pitched "Teo teo teo" sad sound
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            }
+        }
+
+        // Shuffle Array Function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Render Questions
+        function renderQuiz() {
+            const ex1Container = document.getElementById('exercise1-container');
+            const ex2Container = document.getElementById('exercise2-container');
+
+            questionsData.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'quiz-card';
+                card.id = `card-${q.id}`;
+
+                const qText = document.createElement('div');
+                qText.className = 'question-text';
+                qText.innerHTML = `<strong>Câu ${idx + 1}:</strong><br>${q.question}`;
+                card.appendChild(qText);
+
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = 'options-grid';
+
+                // Shuffle options
+                const shuffledOptions = shuffleArray([...q.options]);
+
+                shuffledOptions.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = `option-btn btn-q-${q.id}`;
+                    btn.innerHTML = `<strong>${opt.key}.</strong> ${opt.text}`;
+                    btn.onclick = () => checkAnswer(q.id, opt.key, btn);
+                    optionsGrid.appendChild(btn);
+                });
+
+                card.appendChild(optionsGrid);
+
+                // Explanation Box Definition
+                const expBox = document.createElement('div');
+                expBox.className = 'explanation-box';
+                expBox.id = `exp-${q.id}`;
+                expBox.innerHTML = `
+                    <div class="exp-title">💡 Giải thích siêu chi tiết từ Ms Lê Hằng:</div>
+                    <div class="exp-content">${q.explanation}</div>
+                `;
+                card.appendChild(expBox);
+
+                if (q.ex === 1) {
+                    ex1Container.appendChild(card);
+                } else {
+                    ex2Container.appendChild(card);
+                }
+            });
+        }
+
+        // User Answers State Tracker
+        const userAnswers = {};
+
+        function checkAnswer(qId, selectedKey, selectedBtn) {
+            if (userAnswers[qId] !== undefined) return; // Prevent multi-click
+
+            const q = questionsData.find(item => item.id === qId);
+            userAnswers[qId] = selectedKey;
+
+            // Disable all options in this card
+            const buttons = document.querySelectorAll(`.btn-q-${qId}`);
+            buttons.forEach(btn => btn.classList.add('disabled'));
+
+            const card = document.getElementById(`card-${qId}`);
+
+            if (selectedKey === q.correct) {
+                selectedBtn.classList.add('correct');
+                playSound('correct');
+                triggerConfetti();
+            } else {
+                selectedBtn.classList.add('wrong');
+                card.classList.add('shake');
+                playSound('wrong');
+                // Highlight correct one
+                buttons.forEach(btn => {
+                    if (btn.innerText.startsWith(q.correct)) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            // Show detailed explanation instantly
+            document.getElementById(`exp-${qId}`).style.display = 'block';
+        }
+
+        // Submit and Calculate Score
+        function submitQuiz() {
+            let score = 0;
+            const total = questionsData.length;
+
+            questionsData.forEach(q => {
+                if (userAnswers[q.id] === q.correct) {
+                    score++;
+                }
+            });
+
+            const percent = (score / total) * 100;
+            let comment = "";
+
+            if (percent < 50) {
+                comment = "Điểm lần này chưa cao lắm, con cố gắng đọc kĩ giải thích đáp án và làm lại nha. Cô tin con sẽ làm tốt hơn ở lần sau! 💪";
+            } else if (percent >= 60 && percent <= 80) {
+                comment = "Con đã có tiến bộ khá ổn rồi, con cố gắng đọc kĩ giải thích đáp án và làm lại nha. Cô tin con sẽ làm tốt hơn ở lần sau! ✨";
+            } else {
+                comment = "Làm tốt lắm, con cố gắng ring điểm 10 ở lần sau nha! 🎉🏆";
+            }
+
+            document.getElementById('popupScore').innerText = `${score} / ${total}`;
+            document.getElementById('popupComment').innerText = comment;
+            document.getElementById('scoreModal').classList.add('active');
+
+            if(percent >= 80) {
+                triggerConfettiLoop();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('scoreModal').classList.remove('active');
+            location.reload(); // Quick reload to reset state and shuffle again
+        }
+
+        // Simple HTML5 Canvas Confetti Effect
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let confettiPieces = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function triggerConfetti() {
+            for (let i = 0; i < 50; i++) {
+                confettiPieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * canvas.height,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+        }
+
+        function triggerConfettiLoop() {
+            triggerConfetti();
+            setTimeout(triggerConfetti, 300);
+            setTimeout(triggerConfetti, 600);
+        }
+
+        function drawConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            confettiPieces.forEach((p, index) => {
+                p.tiltAngle += p.tiltAngleIncremental;
+                p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle);
+                p.tilt = Math.sin(p.tiltAngle - index / 3) * 15;
+
+                if (p.y > canvas.height) {
+                    confettiPieces.splice(index, 1);
+                }
+
+                ctx.beginPath();
+                ctx.lineWidth = p.r;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                ctx.stroke();
+            });
+            requestAnimationFrame(drawConfetti);
+        }
+        requestAnimationFrame(drawConfetti);
+
+        // Run application
+        window.onload = renderQuiz;
+    </script>
+</body>
+</html>
